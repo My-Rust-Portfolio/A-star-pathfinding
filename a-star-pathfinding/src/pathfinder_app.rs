@@ -113,6 +113,8 @@ impl PathFinderApp {
 fn terrain_type_to_color(terrain: &TerrainType) -> egui::Color32 {
     match terrain {
         TerrainType::Empty => egui::Color32::WHITE,
+        TerrainType::Water => egui::Color32::BLUE,
+        TerrainType::Swamp => egui::Color32::BROWN,
         TerrainType::Wall => egui::Color32::BLACK,
     }
 }
