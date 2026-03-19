@@ -39,7 +39,7 @@ impl PathFinderApp {
 
 impl eframe::App for PathFinderApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
-        self.draw_painter_tool(ctx);
+        self.draw_tools_panel(ctx);
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let cell_size = 20.0;
@@ -111,7 +111,7 @@ impl eframe::App for PathFinderApp {
 
 // ============ private helpers ============
 impl PathFinderApp {
-    fn draw_painter_tool(&mut self, ctx: &egui::Context) {
+    fn draw_tools_panel(&mut self, ctx: &egui::Context) {
         egui::SidePanel::left("tools_panel").show(ctx, |ui| {
             ui.label("Select Terrain to Paint:");
 
