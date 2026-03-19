@@ -1,5 +1,6 @@
 use crate::{grid_data::GridData, terrain_type::TerrainType};
 use eframe::egui;
+use strum::IntoEnumIterator;
 
 const WINDOW_WIDTH: f32 = 850.0;
 const WINDOW_HEIGHT: f32 = 650.0;
@@ -16,9 +17,7 @@ impl PathFinderApp {
             selected_terrain: TerrainType::Empty,
         }
     }
-}
 
-impl PathFinderApp {
     pub fn run() -> eframe::Result<()> {
         let options = eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default()
@@ -36,20 +35,8 @@ impl PathFinderApp {
 }
 
 impl eframe::App for PathFinderApp {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        egui::SidePanel::left("tools_panel").show(ctx, |ui| {
-            ui.heading("A* Pathfinding");
-            ui.separator();
-
-            ui.label("Select Terrain to Paint:");
-            ui.radio_value(&mut self.selected_terrain, TerrainType::Empty, "Empty");
-            ui.radio_value(&mut self.selected_terrain, TerrainType::Wall, "Wall");
-
-            ui.separator();
-            if ui.button("Clear").clicked() {
-                self.grid.clear();
-            }
-        });
+    fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        self.draw_painter_tool(ctx);
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let cell_size = 20.0;
@@ -103,6 +90,25 @@ impl eframe::App for PathFinderApp {
 }
 
 // ============ private helpers ============
+impl PathFinderApp {
+    fn draw_painter_tool(&mut self, ctx: &egui::Context) {
+        egui::SidePanel::left("tools_panel").show(ctx, |ui| {
+            ui.heading("A* Pathfinding");
+            ui.separator();
+
+            ui.label("Select Terrain to Paint:");
+
+            for tt in TerrainType::iter() {
+                ui.radio_value(&mut self.selected_terrain, tt, tt.to_string());
+            }
+
+            ui.separator();
+            if ui.button("Clear").clicked() {
+                self.grid.clear();
+            }
+        });
+    }
+}
 
 fn terrain_type_to_color(terrain: &TerrainType) -> egui::Color32 {
     match terrain {

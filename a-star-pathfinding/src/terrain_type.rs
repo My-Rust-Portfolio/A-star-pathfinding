@@ -1,4 +1,6 @@
-#[derive(Copy, Clone, PartialEq, Eq)]
+use strum::{Display, EnumIter};
+
+#[derive(Copy, Clone, PartialEq, Eq, EnumIter, Display)]
 
 pub enum TerrainType {
     Empty,
