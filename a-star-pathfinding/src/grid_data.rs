@@ -58,7 +58,16 @@ impl GridData {
     pub fn get_width(&self) -> usize {
         self.width
     }
+
     pub fn get_height(&self) -> usize {
         self.height
+    }
+
+    pub fn get_start_point(&self) -> Option<(usize, usize)> {
+        self.start_point
+    }
+
+    pub fn get_end_point(&self) -> Option<(usize, usize)> {
+        self.end_point
     }
 }

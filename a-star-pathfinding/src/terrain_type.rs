@@ -15,7 +15,7 @@ impl TerrainType {
     pub fn cost(&self) -> usize {
         match self {
             TerrainType::Start => 0,
-            TerrainType::Finish => 1,
+            TerrainType::Finish => 0,
             TerrainType::Empty => 1,
             TerrainType::Water => 2,
             TerrainType::Swamp => 3,

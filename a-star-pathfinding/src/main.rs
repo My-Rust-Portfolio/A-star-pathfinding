@@ -1,3 +1,4 @@
+mod astar;
 mod grid_data;
 mod pathfinder_app;
 mod terrain_type;

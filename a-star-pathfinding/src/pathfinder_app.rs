@@ -1,3 +1,4 @@
+use crate::astar;
 use crate::{grid_data::GridData, terrain_type::TerrainType};
 use eframe::egui;
 use strum::IntoEnumIterator;
@@ -8,6 +9,7 @@ const WINDOW_HEIGHT: f32 = 650.0;
 pub struct PathFinderApp {
     grid: GridData,
     selected_terrain: TerrainType,
+    current_path: Option<Vec<(usize, usize)>>,
 }
 
 impl PathFinderApp {
@@ -15,6 +17,7 @@ impl PathFinderApp {
         Self {
             grid: GridData::new(),
             selected_terrain: TerrainType::Start,
+            current_path: None,
         }
     }
 
@@ -69,6 +72,20 @@ impl eframe::App for PathFinderApp {
                 }
             }
 
+            if let Some(path) = &self.current_path {
+                let mut screen_points = Vec::with_capacity(path.len());
+
+                for (grid_x, grid_y) in path {
+                    let min_pos = response.rect.min
+                        + egui::vec2(*grid_x as f32 * cell_size, *grid_y as f32 * cell_size);
+                    let center_pos = min_pos + egui::vec2(cell_size / 2.0, cell_size / 2.0);
+                    screen_points.push(center_pos);
+                }
+
+                let path_stroke = egui::Stroke::new(3.0, egui::Color32::from_rgb(50, 150, 255));
+                painter.line(screen_points, path_stroke);
+            }
+
             // paint the grid
             if response.is_pointer_button_down_on() {
                 if let Some(pointer_pos) = response.interact_pointer_pos() {
@@ -83,6 +100,9 @@ impl eframe::App for PathFinderApp {
                     if grid_x < self.grid.get_width() && grid_y < self.grid.get_height() {
                         self.grid.set_terrain(grid_x, grid_y, self.selected_terrain);
                     }
+
+                    // grid changed, recomputation needed
+                    self.current_path = None;
                 }
             }
         });
@@ -100,7 +120,11 @@ impl PathFinderApp {
             }
 
             ui.separator();
+            if ui.button("Find Path").clicked() {
+                self.current_path = astar::find_path(&self.grid);
+            }
             if ui.button("Clear").clicked() {
+                self.current_path = None;
                 self.grid.clear();
             }
         });
