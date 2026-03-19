@@ -14,7 +14,7 @@ impl PathFinderApp {
     pub fn new() -> Self {
         Self {
             grid: GridData::new(),
-            selected_terrain: TerrainType::Empty,
+            selected_terrain: TerrainType::Start,
         }
     }
 
@@ -93,9 +93,6 @@ impl eframe::App for PathFinderApp {
 impl PathFinderApp {
     fn draw_painter_tool(&mut self, ctx: &egui::Context) {
         egui::SidePanel::left("tools_panel").show(ctx, |ui| {
-            ui.heading("A* Pathfinding");
-            ui.separator();
-
             ui.label("Select Terrain to Paint:");
 
             for tt in TerrainType::iter() {
@@ -112,6 +109,8 @@ impl PathFinderApp {
 
 fn terrain_type_to_color(terrain: &TerrainType) -> egui::Color32 {
     match terrain {
+        TerrainType::Start => egui::Color32::YELLOW,
+        TerrainType::Finish => egui::Color32::RED,
         TerrainType::Empty => egui::Color32::WHITE,
         TerrainType::Water => egui::Color32::BLUE,
         TerrainType::Swamp => egui::Color32::BROWN,
