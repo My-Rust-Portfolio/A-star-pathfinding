@@ -31,10 +31,10 @@ impl GridData {
         &self.terrain
     }
 
-    pub fn get_grid_width(&self) -> usize {
+    pub fn get_width(&self) -> usize {
         self.width
     }
-    pub fn get_grid_height(&self) -> usize {
+    pub fn get_height(&self) -> usize {
         self.height
     }
 }

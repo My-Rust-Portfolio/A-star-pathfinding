@@ -39,16 +39,16 @@ impl eframe::App for PathFinderApp {
             let cell_size = 20.0;
 
             let grid_size = egui::vec2(
-                self.grid.get_grid_width() as f32 * cell_size,
-                self.grid.get_grid_height() as f32 * cell_size,
+                self.grid.get_width() as f32 * cell_size,
+                self.grid.get_height() as f32 * cell_size,
             );
 
             let (response, painter) = ui.allocate_painter(grid_size, egui::Sense::click_and_drag());
 
             let border = egui::Stroke::new(1.0, egui::Color32::from_gray(200));
 
-            for y in 0..self.grid.get_grid_height() {
-                for x in 0..self.grid.get_grid_width() {
+            for y in 0..self.grid.get_height() {
+                for x in 0..self.grid.get_width() {
                     let min_pos =
                         response.rect.min + egui::vec2(x as f32 * cell_size, y as f32 * cell_size);
                     let max_pos = min_pos + egui::vec2(cell_size, cell_size);
@@ -67,6 +67,22 @@ impl eframe::App for PathFinderApp {
                         border,
                         egui::StrokeKind::Outside,
                     );
+                }
+            }
+
+            if response.is_pointer_button_down_on() {
+                if let Some(pointer_pos) = response.interact_pointer_pos() {
+                    // mouse position
+                    let local_x = pointer_pos.x - response.rect.min.x;
+                    let local_y = pointer_pos.y - response.rect.min.y;
+
+                    // find exact cell
+                    let grid_x = (local_x / cell_size) as usize;
+                    let grid_y = (local_y / cell_size) as usize;
+
+                    if grid_x < self.grid.get_width() && grid_y < self.grid.get_height() {
+                        self.grid.set_terrain(grid_x, grid_y, TerrainType::Wall);
+                    }
                 }
             }
         });
