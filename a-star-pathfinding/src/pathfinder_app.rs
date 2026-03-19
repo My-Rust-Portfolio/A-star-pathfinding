@@ -6,14 +6,12 @@ const WINDOW_HEIGHT: f32 = 800.0;
 
 pub struct PathFinderApp {
     grid: GridData,
-    texture: Option<egui::TextureHandle>,
 }
 
 impl PathFinderApp {
     pub fn new() -> Self {
         Self {
             grid: GridData::new(),
-            texture: None,
         }
     }
 }
@@ -37,40 +35,45 @@ impl PathFinderApp {
 
 impl eframe::App for PathFinderApp {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        if self.texture == None {
-            self.update_texture(ctx);
-        }
-
         egui::CentralPanel::default().show(ctx, |ui| {
-            if let Some(texture) = &self.texture {
-                let display_size = egui::vec2(WINDOW_WIDTH, WINDOW_HEIGHT);
+            let cell_size = 20.0;
 
-                let response = ui.add(egui::Image::new(texture));
+            let grid_size = egui::vec2(
+                self.grid.get_grid_width() as f32 * cell_size,
+                self.grid.get_grid_height() as f32 * cell_size,
+            );
+
+            let (response, painter) = ui.allocate_painter(grid_size, egui::Sense::click_and_drag());
+
+            let border = egui::Stroke::new(1.0, egui::Color32::from_gray(200));
+
+            for y in 0..self.grid.get_grid_height() {
+                for x in 0..self.grid.get_grid_width() {
+                    let min_pos =
+                        response.rect.min + egui::vec2(x as f32 * cell_size, y as f32 * cell_size);
+                    let max_pos = min_pos + egui::vec2(cell_size, cell_size);
+                    let cell_rect = egui::Rect::from_min_max(min_pos, max_pos);
+
+                    let terrain = self.grid.get_terrain_type(x, y);
+                    let fill_color = match terrain {
+                        TerrainType::Empty => egui::Color32::WHITE,
+                        TerrainType::Wall => egui::Color32::BLACK,
+                    };
+
+                    painter.rect(
+                        cell_rect,
+                        0.0,
+                        fill_color,
+                        border,
+                        egui::StrokeKind::Outside,
+                    );
+                }
             }
         });
     }
 }
 
 // ============ private helpers ============
-impl PathFinderApp {
-    fn update_texture(&mut self, ctx: &egui::Context) {
-        let pixels: Vec<egui::Color32> = self
-            .grid
-            .get_terrain()
-            .iter()
-            .map(|t| terrain_type_to_color(t))
-            .collect();
-
-        let image = egui::ColorImage::new(self.grid.get_grid_dimensions(), pixels);
-
-        if let Some(texture) = &mut self.texture {
-            texture.set(image, egui::TextureOptions::NEAREST);
-        } else {
-            self.texture =
-                Some(ctx.load_texture("grid_texture", image, egui::TextureOptions::NEAREST));
-        }
-    }
-}
 
 fn terrain_type_to_color(terrain: &TerrainType) -> egui::Color32 {
     match terrain {
