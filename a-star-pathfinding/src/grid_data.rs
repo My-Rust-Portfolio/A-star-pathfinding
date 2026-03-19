@@ -19,6 +19,10 @@ impl GridData {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.terrain.fill(TerrainType::Empty);
+    }
+
     pub fn set_terrain(&mut self, x: usize, y: usize, terrain: TerrainType) {
         self.terrain[y * GRID_WIDTH + x] = terrain;
     }

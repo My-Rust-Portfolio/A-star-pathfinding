@@ -1,17 +1,19 @@
 use crate::{grid_data::GridData, terrain_type::TerrainType};
 use eframe::egui;
 
-const WINDOW_WIDTH: f32 = 800.0;
-const WINDOW_HEIGHT: f32 = 800.0;
+const WINDOW_WIDTH: f32 = 850.0;
+const WINDOW_HEIGHT: f32 = 650.0;
 
 pub struct PathFinderApp {
     grid: GridData,
+    selected_terrain: TerrainType,
 }
 
 impl PathFinderApp {
     pub fn new() -> Self {
         Self {
             grid: GridData::new(),
+            selected_terrain: TerrainType::Empty,
         }
     }
 }
@@ -21,12 +23,12 @@ impl PathFinderApp {
         let options = eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default()
                 .with_inner_size([WINDOW_WIDTH, WINDOW_HEIGHT])
-                .with_title("A Star Pathfinder"),
+                .with_title("A* Pathfinder"),
             ..Default::default()
         };
 
         eframe::run_native(
-            "A Star Pathfinder",
+            "A* Pathfinder",
             options,
             Box::new(|_cc| Ok(Box::new(Self::new()))),
         )
@@ -35,6 +37,20 @@ impl PathFinderApp {
 
 impl eframe::App for PathFinderApp {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        egui::SidePanel::left("tools_panel").show(ctx, |ui| {
+            ui.heading("A* Pathfinding");
+            ui.separator();
+
+            ui.label("Select Terrain to Paint:");
+            ui.radio_value(&mut self.selected_terrain, TerrainType::Empty, "Empty");
+            ui.radio_value(&mut self.selected_terrain, TerrainType::Wall, "Wall");
+
+            ui.separator();
+            if ui.button("Clear").clicked() {
+                self.grid.clear();
+            }
+        });
+
         egui::CentralPanel::default().show(ctx, |ui| {
             let cell_size = 20.0;
 
@@ -55,21 +71,18 @@ impl eframe::App for PathFinderApp {
                     let cell_rect = egui::Rect::from_min_max(min_pos, max_pos);
 
                     let terrain = self.grid.get_terrain_type(x, y);
-                    let fill_color = match terrain {
-                        TerrainType::Empty => egui::Color32::WHITE,
-                        TerrainType::Wall => egui::Color32::BLACK,
-                    };
 
                     painter.rect(
                         cell_rect,
                         0.0,
-                        fill_color,
+                        terrain_type_to_color(&terrain),
                         border,
                         egui::StrokeKind::Outside,
                     );
                 }
             }
 
+            // paint the grid
             if response.is_pointer_button_down_on() {
                 if let Some(pointer_pos) = response.interact_pointer_pos() {
                     // mouse position
@@ -81,7 +94,7 @@ impl eframe::App for PathFinderApp {
                     let grid_y = (local_y / cell_size) as usize;
 
                     if grid_x < self.grid.get_width() && grid_y < self.grid.get_height() {
-                        self.grid.set_terrain(grid_x, grid_y, TerrainType::Wall);
+                        self.grid.set_terrain(grid_x, grid_y, self.selected_terrain);
                     }
                 }
             }
